@@ -16,5 +16,10 @@
 ```clear``` -- clear (clear terminal)**
 ### More coming soon!
 
+## How to use
+**1. Download the latest\
+2. Open your terminal and type ```python3 /path/to/file/```\
+3. You can start using this very basic terminal!**
+
 
 ###### v1.0.0
