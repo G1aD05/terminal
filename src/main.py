@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import datetime
 
 
 class Main:
@@ -39,6 +40,14 @@ class Main:
             self.move()
         elif self.args[0] == 'clear':
             self.clear()
+        elif self.args[0] == 'make':
+            self.make()
+        elif self.args[0] == 'time':
+            self.time()
+        elif self.args[0] == 'copy':
+            self.copy()
+        elif self.args[0] == 'pwd':
+            self.pwd()
         else:
             print('Error: Command not found!')
 
@@ -57,6 +66,10 @@ rmv -f -- rmv -f <file dir>
 rmv -d -- rmv -d <directory dir>
 move -- move <dir> <new dir>
 clear -- clear (clear terminal)
+make -f -- make -f <file name>
+make -d -- make -d <directory name>
+time -- time
+time -format -- time -format <time format>
 """)
 
     def echo(self):
@@ -117,6 +130,27 @@ clear -- clear (clear terminal)
         else:
             os.system('clear')
 
+    def make(self):
+        if self.args[1] == '-d':
+            os.mkdir(self.args[2])
+        if self.args[1] == '-f':
+            with open(self.args[2], 'w') as file:
+                file.write('')
+                file.close()
+
+    def copy(self):
+        shutil.copy(self.args[1], self.args[2])
+
+    def time(self):
+        if len(self.args) > 1:
+            if self.args[1] == '-format':
+                print(datetime.datetime.now().strftime(self.args[2]))
+        else:
+            print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+    def pwd(self):
+        print(os.getcwd())
+
 
 if __name__ == '__main__':
     args = []
@@ -129,3 +163,4 @@ if __name__ == '__main__':
             Main(args)
         except:
             print('Error: Failed to execute command!')
+
