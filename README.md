@@ -13,7 +13,11 @@
 ```rmv -f``` -- rmv -f \<file dir>\
 ```rmv -d``` -- rmv -d \<directory dir>\
 ```move``` -- move \<dir\> \<new dir\>\
-```clear``` -- clear (clear terminal)**
+```clear``` -- clear (clear terminal)\
+```make``` -f -- make -f \<file name\>\
+```make``` -d -- make -d \<directory name\>\
+```time``` -- time\
+```time -format``` -- time -format \<time format\>**
 ### More coming soon!
 
 ## How to use
