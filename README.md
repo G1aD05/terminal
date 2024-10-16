@@ -2,7 +2,6 @@
 
 ## Commands
 **```echo``` -- echo \<text\>\
-```echo -var``` -- echo -var \<var name\>\
 ```mkvar``` -- mkvar \<var name\> \<value\>\
 ```chvar``` -- chvar \<var name\> \<new value\>\
 ```delvar``` -- delvar \<var name\>\
@@ -17,8 +16,9 @@
 ```make``` -f -- make -f \<file name\>\
 ```make``` -d -- make -d \<directory name\>\
 ```time``` -- time\
-```time -format``` -- time -format \<time format\>**
-### More coming soon!
+```time -format``` -- time -format \<time format\>\
+INFO:\
+Use % on most of the commands to use a variable (ex: echo %variable)**
 
 ## How to use
 **1. Download the latest\
@@ -26,4 +26,12 @@
 3. You can start using this very basic terminal!**
 
 
-###### v1.0.0
+## Versions
+### v1.0.0
+**Initial Release**
+### v1.0.3
+**Simplified code and made variables acccessible to almost all of the commands**
+
+## Required moduals
+### localtz
+**Install command: ```pip install localtz```**
