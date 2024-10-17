@@ -1,19 +1,21 @@
+import datetime
 import os
 import shutil
-import datetime
+import platform
+import ping3 as p3
 import tzlocal as tz
+import psutil
 
 
 class Main:
     def __init__(self, args):
-        global vars
+        global vars, history
         self.args = args
         self.save = None
         self.prev_dir = os.getcwd()
         self.vars = vars
-        self._current_dir = None
-        self._move_dir = None
         self.tz = tz.get_localzone()
+        self.history_dat = history
         os.chdir(self.prev_dir)
         self.parse_cmd()
 
@@ -49,8 +51,16 @@ class Main:
                 self.copy()
             case "pwd":
                 self.pwd()
+            case "ping":
+                self.ping()
+            case "psd":
+                self.psd()
+            case "history":
+                self.history()
+            case "pcp":
+                self.pcp()
             case _:
-                print("Command not found!")
+                print("Error: Command not found!")
 
     def help(self):
         print("""
@@ -70,6 +80,10 @@ make -f -- make -f <file name>
 make -d -- make -d <directory name>
 time -- time
 time -format -- time -format <time format>
+ping -- ping <host name>
+history -- (lists command history)
+history -a -- history -a <list amount>
+pcp -- (prints the current processes)
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 """)
@@ -126,27 +140,12 @@ Use % on most of the commands to use a variable (ex: echo %variable)
 
     def rmv(self):
         if self.args[1] == '-f':
-            if self.args[2].startswith("%"):
-                os.remove(self.vars.get(self.args[2][1:]))
-            else:
-                os.remove(self.args[2])
+            os.remove(self.parse_variable(self.args[2]))
         elif self.args[1] == '-d':
-            if self.args[2].startswith("%"):
-                os.rmdir(self.vars.get(self.args[2][1:]))
-            else:
-                os.rmdir(self.args[2])
+            os.rmdir(self.parse_variable(self.args[2]))
 
     def move(self):
-        if self.startswith(self.args[1], "%"):
-            self._current_dir = self.vars.get(self.args[1][1:])
-        else:
-            self._current_dir = self.args[1]
-
-        if self.startswith(self.args[2], "%"):
-            self._move_dir = self.vars.get(self.args[2][1:])
-        else:
-            self._move_dir = self.args[2]
-        shutil.move(self._current_dir, self._move_dir)
+        shutil.move(self.parse_variable(self.args[1]), self.parse_variable(self.args[2]))
 
     def clear(self):
         if os.name == 'nt':
@@ -156,58 +155,67 @@ Use % on most of the commands to use a variable (ex: echo %variable)
 
     def make(self):
         if self.args[1] == '-d':
-            if self.startswith(self.args[2], "%"):
-                os.mkdir(self.vars.get(self.args[2][1:]))
-            else:
-                os.mkdir(self.args[2])
+            os.mkdir(self.parse_variable(self.args[2]))
         if self.args[1] == '-f':
-            if self.startswith(self.args[2], "%"):
-                with open(self.vars.get(self.args[2][1:]), 'w') as file:
-                    file.write('')
-                    file.close()
-            else:
-                with open(self.args[2], 'w') as file:
-                    file.write('')
-                    file.close()
+            with open(self.vars.get(self.parse_variable(self.args[2])), 'w') as file:
+                file.write('')
+                file.close()
 
     def copy(self):
-        if self.startswith(self.args[1], "%"):
-            self._current_dir = self.vars.get(self.args[1][1:])
-        else:
-            self._current_dir = self.args[1]
-
-        if self.startswith(self.args[2], "%"):
-            self._move_dir = self.vars.get(self.args[2][1:])
-        else:
-            self._move_dir = self.args[2]
-        shutil.copy(self._current_dir, self._move_dir)
+        shutil.copy(self.parse_variable(self.args[1]), self.parse_variable(self.args[2]))
 
     def time(self):
         if len(self.args) > 1:
             if self.args[1] == '-format':
-                if self.startswith(self.args[2], "%"):
-                    print(datetime.datetime.now().strftime(self.vars.get(self.args[2][1:])))
-                else:
-                    print(datetime.datetime.now(self.tz).strftime(self.args[2]))
+                print(datetime.datetime.now(self.tz).strftime(self.parse_variable(self.args[2])))
         else:
             print(datetime.datetime.now(self.tz).strftime('%Y-%m-%d %H:%M:%S'))
 
     def pwd(self):
         print(os.getcwd())
 
+    def ping(self):
+        host = self.parse_variable(self.args[1])
+        rtt = p3.ping(host)
+        if rtt is not None:
+            print(f"Ping to {host} successful. RTT: {rtt} ms")
+        else:
+            print(f"Failed to ping {host}.")
+
+    def psd(self):
+        print("System data:")
+        print(platform.system())
+        print(platform.release())
+        print(platform.version())
+        print(platform.machine())
+        print(platform.processor())
+        print(platform.architecture())
+
+    def history(self):
+        if len(self.args) >= 2:
+            if self.args[1] == "-a":
+                print(self.history_dat[:int(self.parse_variable(self.args[2]))])
+        else:
+            print(self.history_dat)
+
+    def pcp(self):
+        for process in psutil.process_iter(['pid', 'name']):
+            print(f"PID: {process.info['pid']}, Name: {process.info['name']}")
+
     def return_vars(self):
         return self.vars
 
-    def startswith(self, _string: str, _char: str):
-        if _string.startswith(_char):
-            return True
+    def parse_variable(self, _var: str) -> str:
+        if _var.startswith("%"):
+            return self.vars.get(_var[1:])
         else:
-            return False
+            return _var
 
 
 if __name__ == '__main__':
     args = []
     vars = {}
+    history = []
     while True:
         inp = input(f'{os.getcwd()} % ')
         args.clear()
@@ -215,5 +223,6 @@ if __name__ == '__main__':
             args.append(i)
         try:
             vars.update(Main(args).return_vars())
+            history.append(inp)
         except:
             print('Error: Failed to execute command!')
