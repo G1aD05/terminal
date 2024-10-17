@@ -1,7 +1,7 @@
 # Simple Terminal
 
 ## Commands
-**```echo``` -- echo \<text\>\
+```echo``` -- echo \<text\>\
 ```mkvar``` -- mkvar \<var name\> \<value\>\
 ```chvar``` -- chvar \<var name\> \<new value\>\
 ```delvar``` -- delvar \<var name\>\
