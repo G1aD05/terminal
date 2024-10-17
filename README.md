@@ -1,7 +1,7 @@
 # Simple Terminal
 
 ## Commands
-```echo``` -- echo \<text\>\
+**```echo``` -- echo \<text\>\
 ```mkvar``` -- mkvar \<var name\> \<value\>\
 ```chvar``` -- chvar \<var name\> \<new value\>\
 ```delvar``` -- delvar \<var name\>\
@@ -20,7 +20,8 @@
 ```ping``` -- ping \<host name\>\
 ```history``` -- (lists command history)\
 ```history -a``` -- history -a \<list amount\>\
-```pcp``` -- (prints the current processes)\
+```pcp``` -- (prints the current processes)**
+
 > INFO:
 > Use % on most of the commands to use a variable (ex: echo %variable)
 
