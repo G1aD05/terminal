@@ -22,7 +22,7 @@
 ```history -a``` -- history -a \<list amount\>\
 ```pcp``` -- (prints the current processes)\
 > INFO:
-> Use % on most of the commands to use a variable (ex: echo %variable)**
+> Use % on most of the commands to use a variable (ex: echo %variable)
 
 ## How to use
 **1. Download the latest\
