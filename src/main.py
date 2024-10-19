@@ -9,6 +9,8 @@ import random
 import importlib.util
 import inspect
 
+__version__ = "1.2.1-beta"
+
 
 class Main:
     def __init__(self, args):
