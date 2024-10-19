@@ -5,6 +5,9 @@ import platform
 import ping3 as p3
 import tzlocal as tz
 import psutil
+import random
+import importlib.util
+import inspect
 
 
 class Main:
@@ -16,6 +19,7 @@ class Main:
         self.vars = vars
         self.tz = tz.get_localzone()
         self.history_dat = history
+        self.file_lines = []
         os.chdir(self.prev_dir)
         self.parse_cmd()
 
@@ -59,6 +63,8 @@ class Main:
                 self.history()
             case "pcp":
                 self.pcp()
+            case "run":
+                self.run()
             case _:
                 print("Error: Command not found!")
 
@@ -86,66 +92,47 @@ history -a -- history -a <list amount>
 pcp -- (prints the current processes)
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
+Use & as a space in strings (ex: echo Hello,&World)
+Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
 """)
 
     def echo(self):
-        if self.args[1].startswith("%"):
-            print(self.vars.get(self.args[1][1:]))
-        elif isinstance(self.args[1], str):
-            print(self.args[1])
-        else:
-            print('Error: Not a string or a variable.')
+        print(self.parse_type(self.args[1]))
 
     def mkvar(self):
-        self.vars.update({self.args[1]: self.args[2]})
+        self.vars.update({self.parse_string(self.args[1]): self.parse_type(self.args[2])})
 
     def chvar(self):
-        self.vars[self.args[1]] = self.args[2]
+        self.vars[self.parse_type(self.args[1])] = self.parse_type(self.args[2])
 
     def delvar(self):
-        self.vars.pop(self.args[1])
+        self.vars.pop(self.parse_type(self.args[1]))
 
     def cd(self):
-        if self.args[1].startswith("%"):
-            os.chdir(self.vars.get(self.args[1][1:]))
-        else:
-            os.chdir(self.prev_dir)
-            os.chdir(self.args[1])
-            self.prev_dir = os.getcwd()
+        os.chdir(self.parse_type(self.args[1]))
 
     def ls(self):
         if len(self.args[1:]) > 0:
             if self.args[1] == '-d':
-                if self.args[2].startswith("%"):
-                    self.prev_dir = os.getcwd()
-                    os.chdir(self.vars.get(self.args[2][1:]))
-                    for i in os.listdir():
-                        print(i)
-                    os.chdir(self.prev_dir)
-                else:
-                    self.prev_dir = os.getcwd()
-                    os.chdir(self.args[2])
-                    for i in os.listdir():
-                        print(i)
-                    os.chdir(self.prev_dir)
+                os.chdir(self.parse_type(self.args[2]))
+                for i in os.listdir():
+                    print(i)
+                os.chdir(self.prev_dir)
         else:
             for i in os.listdir():
                 print(i)
 
     def read(self):
-        if self.args[1].startswith("%"):
-            print(open(self.vars.get(self.args[1][1:]), 'r').read())
-        else:
-            print(open(self.args[1], 'r').read())
+        print(open(self.parse_type(self.args[1]), 'r').read())
 
     def rmv(self):
         if self.args[1] == '-f':
-            os.remove(self.parse_variable(self.args[2]))
+            os.remove(self.parse_type(self.args[2]))
         elif self.args[1] == '-d':
-            os.rmdir(self.parse_variable(self.args[2]))
+            os.rmdir(self.parse_type(self.args[2]))
 
     def move(self):
-        shutil.move(self.parse_variable(self.args[1]), self.parse_variable(self.args[2]))
+        shutil.move(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
 
     def clear(self):
         if os.name == 'nt':
@@ -155,19 +142,19 @@ Use % on most of the commands to use a variable (ex: echo %variable)
 
     def make(self):
         if self.args[1] == '-d':
-            os.mkdir(self.parse_variable(self.args[2]))
-        if self.args[1] == '-f':
-            with open(self.vars.get(self.parse_variable(self.args[2])), 'w') as file:
+            os.mkdir(self.parse_type(self.args[2]))
+        elif self.args[1] == '-f':
+            with open(self.parse_type(self.args[2]), 'w') as file:
                 file.write('')
                 file.close()
 
     def copy(self):
-        shutil.copy(self.parse_variable(self.args[1]), self.parse_variable(self.args[2]))
+        shutil.copy(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
 
     def time(self):
         if len(self.args) > 1:
             if self.args[1] == '-format':
-                print(datetime.datetime.now(self.tz).strftime(self.parse_variable(self.args[2])))
+                print(datetime.datetime.now(self.tz).strftime(self.parse_type(self.args[2])))
         else:
             print(datetime.datetime.now(self.tz).strftime('%Y-%m-%d %H:%M:%S'))
 
@@ -175,7 +162,7 @@ Use % on most of the commands to use a variable (ex: echo %variable)
         print(os.getcwd())
 
     def ping(self):
-        host = self.parse_variable(self.args[1])
+        host = self.parse_type(self.args[1])
         rtt = p3.ping(host)
         if rtt is not None:
             print(f"Ping to {host} successful. RTT: {rtt} ms")
@@ -194,7 +181,7 @@ Use % on most of the commands to use a variable (ex: echo %variable)
     def history(self):
         if len(self.args) >= 2:
             if self.args[1] == "-a":
-                print(self.history_dat[:int(self.parse_variable(self.args[2]))])
+                print(self.history_dat[:int(self.parse_type(self.args[2]))])
         else:
             print(self.history_dat)
 
@@ -202,27 +189,99 @@ Use % on most of the commands to use a variable (ex: echo %variable)
         for process in psutil.process_iter(['pid', 'name']):
             print(f"PID: {process.info['pid']}, Name: {process.info['name']}")
 
-    def return_vars(self):
+    def run(self):
+        global params
+        self.prev_dir = os.getcwd()
+        os.chdir(self.args[1])
+        for line in open("init.txt", 'r').read().split('\n'):
+            self.file_lines.append(line)
+        spec = importlib.util.spec_from_file_location("run", "run.py")
+        script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(script)
+        if len(self.file_lines) > 1:
+            if self.file_lines[1] == ":ARGS:":
+                params = []
+                for i in range(len(self.file_lines)):
+                    params.append(self.file_lines[i])
+                params = params[2:]
+                print(params)
+        if hasattr(script, self.file_lines[0]):
+            klass = getattr(script, self.file_lines[0])
+            instance = klass(*params)
+            if hasattr(instance, self.file_lines[0]):
+                method = getattr(instance, self.file_lines[0])
+                method()
+        os.chdir(self.prev_dir)
+
+    def return_vars(self) -> dict:
+        """
+        :return:
+        """
         return self.vars
 
     def parse_variable(self, _var: str) -> str:
+        """
+        :return:
+        """
         if _var.startswith("%"):
             return self.vars.get(_var[1:])
         else:
             return _var
+
+    def parse_type(self, _str):
+        """
+        :return:
+        """
+        _str = self.parse_string(_str)
+        _str = self.parse_variable(_str)
+        _str = self.detect_rand(_str)
+        return _str
+
+    @staticmethod
+    def parse_string(_string: str) -> str:
+        """
+        :return:
+        """
+        if "&" in _string:
+            _string = _string.replace("&", " ")
+            return _string
+        else:
+            return _string
+
+    @staticmethod
+    def detect_rand(_string: str) -> str:
+        """
+        :return:
+        """
+        if "_rand_" in _string:
+            return _string.replace("_rand_", str(random.randint(0, 100)))
+        else:
+            return _string
 
 
 if __name__ == '__main__':
     args = []
     vars = {}
     history = []
+    debug = True
+    params = []
     while True:
-        inp = input(f'{os.getcwd()} % ')
-        args.clear()
-        for i in inp.split(' '):
-            args.append(i)
-        try:
+        if not debug:
+            inp = input(f'{os.getcwd()} % ')
+            args.clear()
+            for i in inp.split(' '):
+                args.append(i)
+            try:
+                vars.update(Main(args).return_vars())
+                history.append(inp)
+            except:
+                print("Error: Failed to execute command!")
+
+        elif debug:
+            inp = input(f'{os.getcwd()} % ')
+            args.clear()
+            for i in inp.split(' '):
+                args.append(i)
+
             vars.update(Main(args).return_vars())
             history.append(inp)
-        except:
-            print('Error: Failed to execute command!')
