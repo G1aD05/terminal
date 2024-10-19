@@ -41,6 +41,8 @@
 **Cleaned up code and added new commands.**
 ### v1.2.1
 **Bug fixes, added the new run command, added \_rand_ (generates a random number) and added the & symbol which represents a space.**
+### v1.2.3
+**Fixed some left over debugging helper things that I accidentally left in**
 
 ## Required moduals
 ### localtz
