@@ -20,10 +20,13 @@
 ```ping``` -- ping \<host name\>\
 ```history``` -- (lists command history)\
 ```history -a``` -- history -a \<list amount\>\
-```pcp``` -- (prints the current processes)**
+```pcp``` -- (prints the current processes)\
+```run``` -- run \<folder name>**
 
-> INFO:
-> Use % on most of the commands to use a variable (ex: echo %variable)
+> INFO:\
+> Use % on most of the commands to use a variable (ex: echo %variable)\
+> Use & as a space in strings (ex: echo Hello,&World)\
+> Use \_rand_ to generate a random number (BETA) (ex: echo \_rand_)
 
 ## How to use
 **1. Download the latest\
@@ -31,11 +34,13 @@
 3. You can start using this very basic terminal!**
 ## Versions
 ### v1.0.0
-**Initial Release**
+**Initial Release.**
 ### v1.0.3
-**Simplified code and made variables acccessible to almost all of the commands**
+**Simplified code and made variables acccessible to almost all of the commands.**
 ### v1.1.0
-**Cleaned up code and added new commands**
+**Cleaned up code and added new commands.**
+### v1.2.1
+**Bug fixes, added the new run command, added \_rand_ (generates a random number) and added the & symbol which represents a space.**
 
 ## Required moduals
 ### localtz
@@ -44,3 +49,26 @@
 **Install command: ```pip install ping3```**
 ### psutil
 **Install command: ```pip install psutil```**
+
+## How to Make a Runnable Folder
+**Make a folder that looks like this:
+\<folder name>\
+|-- run.txt\
+|-- init.py\
+init.py must have a class in it, example:**
+
+```python
+class Main:
+  def __init__(self, params):
+    # Some code
+  ```
+
+**run.txt must have the class name and required arguments, example:**
+
+```text
+Class Name Here
+:ARGS: (Optional if you don't need arguments for your __init__ then don't add this)
+requirement
+requirement
+```
+**then you can use this command: ```run <folder name>```**
