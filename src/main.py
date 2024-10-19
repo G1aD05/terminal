@@ -265,7 +265,7 @@ if __name__ == '__main__':
     args = []
     vars = {}
     history = []
-    debug = True
+    debug = False
     params = []
     while True:
         if not debug:
