@@ -66,10 +66,17 @@ class Main:
             case "run":
                 self.run()
             case "debug":
-                print("Debug mode on")
-                debug = True
+                if len(self.args) >= 1:
+                    if self.args[1] == "off":
+                        print("Debug mode off")
+                        debug = False
+                    elif self.args[1] == "on":
+                        print("Debug mode on")
+                        debug = True
             case "exit":
                 exit()
+            case "!":
+                self.shell_run()
             case _:
                 print("Error: Command not found!")
 
@@ -93,9 +100,9 @@ time -- time
 time -format -- time -format <time format>
 ping -- ping <host name>
 history -- (lists command history)
-history -a -- history -a <list amount>
 pcp -- (prints the current processes)
 run -- run <folder name>
+! -- ! <file name> (ex: ! exec.txt)
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
@@ -185,11 +192,8 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         print(platform.architecture())
 
     def history(self):
-        if len(self.args) >= 2:
-            if self.args[1] == "-a":
-                print(self.history_dat[:int(self.parse_type(self.args[2]))])
-        else:
-            print(self.history_dat)
+        for i in self.history_dat:
+            print(i)
 
     def pcp(self):
         for process in psutil.process_iter(['pid', 'name']):
@@ -217,6 +221,18 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
                 method = getattr(instance, self.file_lines[0])
                 method()
         os.chdir(self.prev_dir)
+
+    def shell_run(self):
+        lines = []
+        parsed_lines = []
+        if os.path.isfile(self.args[1]):
+            for line in open(self.args[1], 'r').read().split('\n'):
+                lines.append(line)
+            for i in range(len(lines)):
+                parsed_lines.append(lines[i].split(" "))
+            for i in range(len(parsed_lines)):
+                self.args = parsed_lines[i]
+                self.parse_cmd()
 
     def return_vars(self) -> dict:
         """
