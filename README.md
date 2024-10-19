@@ -21,7 +21,9 @@
 ```history``` -- (lists command history)\
 ```history -a``` -- history -a \<list amount\>\
 ```pcp``` -- (prints the current processes)\
-```run``` -- run \<folder name>**
+```run``` -- run \<folder name>\
+```input``` -- input <text>\
+```!``` -- ! \<file name>**
 
 > INFO:\
 > Use % on most of the commands to use a variable (ex: echo %variable)\
@@ -40,9 +42,11 @@
 ### v1.1.0
 **Cleaned up code and added new commands.**
 ### v1.2.1
-**Bug fixes, added the new run command, added \_rand_ (generates a random number) and added the & symbol which represents a space.**
+**Bug fixes, added the new run command, added ```_rand_``` (generates a random number) and added the ```&``` symbol which represents a space.**
 ### v1.2.3
 **Fixed some left over debugging helper things that I accidentally left in**
+### v1.3.0
+**Improved variable detection system, added the ```input``` (Gets an input from the user access with @out) and ```!``` (Run shell files) commands, and bug fixes**
 
 ## Required moduals
 ### localtz
