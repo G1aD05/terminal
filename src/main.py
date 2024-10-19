@@ -193,9 +193,9 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         global params
         self.prev_dir = os.getcwd()
         os.chdir(self.args[1])
-        for line in open("init.txt", 'r').read().split('\n'):
+        for line in open("run.txt", 'r').read().split('\n'):
             self.file_lines.append(line)
-        spec = importlib.util.spec_from_file_location("run", "run.py")
+        spec = importlib.util.spec_from_file_location("init", "init.py")
         script = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(script)
         if len(self.file_lines) > 1:
