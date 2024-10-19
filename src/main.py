@@ -7,9 +7,6 @@ import tzlocal as tz
 import psutil
 import random
 import importlib.util
-import inspect
-
-__version__ = "1.2.1-beta"
 
 
 class Main:
@@ -26,6 +23,7 @@ class Main:
         self.parse_cmd()
 
     def parse_cmd(self):
+        global debug
         match self.args[0]:
             case "help":
                 self.help()
@@ -67,6 +65,11 @@ class Main:
                 self.pcp()
             case "run":
                 self.run()
+            case "debug":
+                print("Debug mode on")
+                debug = True
+            case "exit":
+                exit()
             case _:
                 print("Error: Command not found!")
 
@@ -92,6 +95,7 @@ ping -- ping <host name>
 history -- (lists command history)
 history -a -- history -a <list amount>
 pcp -- (prints the current processes)
+run -- run <folder name>
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
@@ -206,7 +210,6 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
                 for i in range(len(self.file_lines)):
                     params.append(self.file_lines[i])
                 params = params[2:]
-                print(params)
         if hasattr(script, self.file_lines[0]):
             klass = getattr(script, self.file_lines[0])
             instance = klass(*params)
