@@ -77,6 +77,8 @@ class Main:
                 exit()
             case "!":
                 self.shell_run()
+            case "input":
+                self.input()
             case _:
                 print("Error: Command not found!")
 
@@ -234,35 +236,40 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
                 self.args = parsed_lines[i]
                 self.parse_cmd()
 
+    def input(self):
+        global out
+        out = input(self.parse_type(self.args[1]))
+
     def return_vars(self) -> dict:
-        """
-        :return:
-        """
         return self.vars
 
     def parse_variable(self, _var: str) -> str:
-        """
-        :return:
-        """
-        if _var.startswith("%"):
-            return self.vars.get(_var[1:])
+        splits = []
+        _str = ""
+        if "%" in _var:
+            for split in _var.split(" "):
+                splits.append(split)
+            for i in range(len(splits)):
+                if splits[i].startswith("%"):
+                    splits[i] = self.vars.get(splits[i][1:])
+            for x in range(len(splits)):
+                if not x == 0:
+                    _str = _str + " " + splits[x]
+                else:
+                    _str = _str + splits[x]
+            return _str
         else:
             return _var
 
     def parse_type(self, _str):
-        """
-        :return:
-        """
         _str = self.parse_string(_str)
-        _str = self.parse_variable(_str)
         _str = self.detect_rand(_str)
+        _str = self.det_ats(_str)
+        _str = self.parse_variable(_str)
         return _str
 
     @staticmethod
     def parse_string(_string: str) -> str:
-        """
-        :return:
-        """
         if "&" in _string:
             _string = _string.replace("&", " ")
             return _string
@@ -271,13 +278,19 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
 
     @staticmethod
     def detect_rand(_string: str) -> str:
-        """
-        :return:
-        """
         if "_rand_" in _string:
             return _string.replace("_rand_", str(random.randint(0, 100)))
         else:
             return _string
+
+    @staticmethod
+    def det_ats(_str):
+        global out
+        if "@out" in _str:
+            _str = _str.replace("@out", out)
+            return _str
+        else:
+            return _str
 
 
 if __name__ == '__main__':
@@ -286,6 +299,7 @@ if __name__ == '__main__':
     history = []
     debug = False
     params = []
+    out = ""
     while True:
         if not debug:
             inp = input(f'{os.getcwd()} % ')
