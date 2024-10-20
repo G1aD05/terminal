@@ -7,6 +7,9 @@ import tzlocal as tz
 import psutil
 import random
 import importlib.util
+import zipfile as zip
+import signal
+import pyfiglet
 
 
 class Main:
@@ -23,7 +26,6 @@ class Main:
         self.parse_cmd()
 
     def parse_cmd(self):
-        global debug
         match self.args[0]:
             case "help":
                 self.help()
@@ -63,26 +65,29 @@ class Main:
                 self.history()
             case "pcp":
                 self.pcp()
-            case "run":
-                self.run()
             case "debug":
-                if len(self.args) >= 1:
-                    if self.args[1] == "off":
-                        print("Debug mode off")
-                        debug = False
-                    elif self.args[1] == "on":
-                        print("Debug mode on")
-                        debug = True
+                self.debug()
             case "exit":
                 exit()
             case "!":
                 self.shell_run()
             case "input":
                 self.input()
+            case "run":
+                self.run()
+            case "zip":
+                self.zip()
+            case "kill":
+                self.kill()
+            case "banner":
+                self.banner()
+            case "":
+                pass
             case _:
                 print("Error: Command not found!")
 
-    def help(self):
+    @staticmethod
+    def help():
         print("""
 echo -- echo <text>
 mkvar -- mkvar <var name> <value>
@@ -105,6 +110,11 @@ history -- (lists command history)
 pcp -- (prints the current processes)
 run -- run <folder name>
 ! -- ! <file name> (ex: ! exec.txt)
+zip -u -- zip -u <zip file name> <directory name>
+zip -z -- zip -z <zip file name> <directory/file name>
+kill -- kill <process id>
+banner -- banner <text>
+banner -f -- banner -f <text> <font>
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
@@ -137,6 +147,16 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
             for i in os.listdir():
                 print(i)
 
+    def debug(self):
+        global debug
+        if len(self.args) >= 1:
+            if self.args[1] == "off":
+                print("Debug mode off")
+                debug = False
+            elif self.args[1] == "on":
+                print("Debug mode on")
+                debug = True
+
     def read(self):
         print(open(self.parse_type(self.args[1]), 'r').read())
 
@@ -149,7 +169,8 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
     def move(self):
         shutil.move(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
 
-    def clear(self):
+    @staticmethod
+    def clear():
         if os.name == 'nt':
             os.system('cls')
         else:
@@ -173,7 +194,8 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         else:
             print(datetime.datetime.now(self.tz).strftime('%Y-%m-%d %H:%M:%S'))
 
-    def pwd(self):
+    @staticmethod
+    def pwd():
         print(os.getcwd())
 
     def ping(self):
@@ -184,7 +206,8 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         else:
             print(f"Failed to ping {host}.")
 
-    def psd(self):
+    @staticmethod
+    def psd():
         print("System data:")
         print(platform.system())
         print(platform.release())
@@ -197,7 +220,8 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         for i in self.history_dat:
             print(i)
 
-    def pcp(self):
+    @staticmethod
+    def pcp():
         for process in psutil.process_iter(['pid', 'name']):
             print(f"PID: {process.info['pid']}, Name: {process.info['name']}")
 
@@ -214,7 +238,10 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
             if self.file_lines[1] == ":ARGS:":
                 params = []
                 for i in range(len(self.file_lines)):
-                    params.append(self.file_lines[i])
+                    if self.file_lines[i] == "@arg":
+                        params.append(self.parse_type(self.args[i]))
+                    else:
+                        params.append(self.file_lines[i])
                 params = params[2:]
         if hasattr(script, self.file_lines[0]):
             klass = getattr(script, self.file_lines[0])
@@ -239,6 +266,23 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
     def input(self):
         global out
         out = input(self.parse_type(self.args[1]))
+
+    def zip(self):
+        if self.args[1] == "-z":
+            with zip.ZipFile(self.args[2], 'w') as file:
+                file.write(self.args[3])
+        if self.args[1] == "-u":
+            with zip.ZipFile(self.args[2], 'r') as file:
+                file.extractall(self.args[3])
+
+    def kill(self):
+        os.kill(int(self.args[1]), signal.SIGKILL)
+
+    def banner(self):
+        if self.args[1] == "-f":
+            print(pyfiglet.figlet_format(self.parse_type(self.args[2]), font=self.args[3]))
+        else:
+            print(pyfiglet.figlet_format(self.parse_type(self.args[1])))
 
     def return_vars(self) -> dict:
         return self.vars
