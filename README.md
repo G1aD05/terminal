@@ -23,7 +23,12 @@
 ```pcp``` -- (prints the current processes)\
 ```run``` -- run \<folder name>\
 ```input``` -- input <text>\
-```!``` -- ! \<file name>**
+```!``` -- ! \<file name>\
+```zip -u``` -- zip -u \<zip file name> \<directory name>\
+```zip -z``` -- zip -z \<zip file name> <directory/file name>\
+```kill``` -- kill \<process id>\
+```banner``` -- banner \<text>\
+```banner -f``` -- banner -f \<text> \<font>**
 
 > INFO:\
 > Use % on most of the commands to use a variable (ex: echo %variable)\
@@ -47,14 +52,18 @@
 **Fixed some left over debugging helper things that I accidentally left in**
 ### v1.3.0
 **Improved variable detection system, added the ```input``` (Gets an input from the user access with @out) and ```!``` (Run shell files) commands, and bug fixes**
+### v1.3.5
+**Added the new ```zip```, ```kill``` and ```banner``` commands, added support for manual arguments for the run command**
 
-## Required moduals
+## Required modules
 ### localtz
 **Install command: ```pip install localtz```**
 ### ping3
 **Install command: ```pip install ping3```**
 ### psutil
 **Install command: ```pip install psutil```**
+### pyfiglet
+**Install command: ```pip install pyfiglet```**
 
 ## How to Make a Runnable Folder
 **Make a folder that looks like this:
@@ -74,7 +83,8 @@ class Main:
 ```text
 Class Name Here
 :ARGS: (Optional if you don't need arguments for your __init__ then don't add this)
-requirement
-requirement
+argument
+@arg (This is optional it just lets a manual inputted argument when running the run command)
 ```
 **then you can use this command: ```run <folder name>```**
+
