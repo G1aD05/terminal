@@ -75,12 +75,13 @@
 **Install command: ```pip install colorama```**
 
 ## How to Make a Runnable Folder
-**Make a folder that looks like this:
-\<folder name>\
-|-- run.txt\
-|-- init.py\
-init.py must have a class in it, example:**
-
+**Make a folder that looks like this:\
+```text
+<folder name>
+|-- run.txt
+|-- init.py
+```
+init.py must have a class in it, example:
 ```python
 class Main:
   def __init__(self, params):
