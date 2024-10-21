@@ -28,7 +28,9 @@
 ```zip -z``` -- zip -z \<zip file name> <directory/file name>\
 ```kill``` -- kill \<process id>\
 ```banner``` -- banner \<text>\
-```banner -f``` -- banner -f \<text> \<font>**
+```banner -f``` -- banner -f \<text> \<font>\
+```dld``` -- dld \<url> \<output name>\
+```find``` -- find \<file name> \<search term>**
 
 > INFO:\
 > Use % on most of the commands to use a variable (ex: echo %variable)\
@@ -54,6 +56,8 @@
 **Improved variable detection system, added the ```input``` (Gets an input from the user access with @out) and ```!``` (Run shell files) commands, and bug fixes**
 ### v1.3.5
 **Added the new ```zip```, ```kill``` and ```banner``` commands, added support for manual arguments for the run command**
+### v1.3.7
+**Added the new ```dld``` and ```find``` commands, added line coloring**
 
 ## Required modules
 ### localtz
@@ -64,6 +68,8 @@
 **Install command: ```pip install psutil```**
 ### pyfiglet
 **Install command: ```pip install pyfiglet```**
+### colorama
+**Install command: ```pip install colorama```**
 
 ## How to Make a Runnable Folder
 **Make a folder that looks like this:
