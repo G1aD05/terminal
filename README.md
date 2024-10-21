@@ -1,5 +1,8 @@
 # Simple Terminal
 
+> [!Note]\
+> Requires Python 3.x
+
 ## Commands
 **```echo``` -- echo \<text\>\
 ```mkvar``` -- mkvar \<var name\> \<value\>\
