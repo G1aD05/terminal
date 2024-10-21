@@ -10,6 +10,9 @@ import importlib.util
 import zipfile as zip
 import signal
 import pyfiglet
+import urllib.request
+import colorama
+from colorama import Fore, Style, init
 
 
 class Main:
@@ -67,8 +70,6 @@ class Main:
                 self.pcp()
             case "debug":
                 self.debug()
-            case "exit":
-                exit()
             case "!":
                 self.shell_run()
             case "input":
@@ -81,10 +82,14 @@ class Main:
                 self.kill()
             case "banner":
                 self.banner()
+            case "dld":
+                self.download()
+            case "find":
+                self.find()
             case "":
                 pass
             case _:
-                print("Error: Command not found!")
+                print(Fore.RED + Style.BRIGHT + "Error: Command not found!")
 
     @staticmethod
     def help():
@@ -115,6 +120,8 @@ zip -z -- zip -z <zip file name> <directory/file name>
 kill -- kill <process id>
 banner -- banner <text>
 banner -f -- banner -f <text> <font>
+dld -- dld <url>
+find -- find <directory> <search term>
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
@@ -164,7 +171,7 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         if self.args[1] == '-f':
             os.remove(self.parse_type(self.args[2]))
         elif self.args[1] == '-d':
-            os.rmdir(self.parse_type(self.args[2]))
+            shutil.rmtree(self.parse_type(self.args[2]))
 
     def move(self):
         shutil.move(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
@@ -269,11 +276,11 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
 
     def zip(self):
         if self.args[1] == "-z":
-            with zip.ZipFile(self.args[2], 'w') as file:
-                file.write(self.args[3])
+            with zip.ZipFile(self.parse_type(self.args[2]), 'w') as file:
+                file.write(self.parse_type(self.args[3]))
         if self.args[1] == "-u":
-            with zip.ZipFile(self.args[2], 'r') as file:
-                file.extractall(self.args[3])
+            with zip.ZipFile(self.parse_type(self.args[2]), 'r') as file:
+                file.extractall(self.parse_type(self.args[3]))
 
     def kill(self):
         os.kill(int(self.args[1]), signal.SIGKILL)
@@ -283,6 +290,19 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
             print(pyfiglet.figlet_format(self.parse_type(self.args[2]), font=self.args[3]))
         else:
             print(pyfiglet.figlet_format(self.parse_type(self.args[1])))
+
+    def download(self):
+        urllib.request.urlretrieve(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
+
+    def find(self):
+        index = 0
+        times = 0
+        for line in open(self.parse_type(self.args[1]), 'r').read().split('\n'):
+            index += 1
+            if self.parse_type(self.args[2]) in line:
+                print(f"Line {index}: {line.replace(self.parse_type(self.args[2]), f"~{self.parse_type(self.args[2])}~")}")
+                times += 1
+        print(f"Search term \"{self.parse_type(self.args[2])}\" found {times} times in {self.args[1]}")
 
     def return_vars(self) -> dict:
         return self.vars
@@ -344,9 +364,13 @@ if __name__ == '__main__':
     debug = False
     params = []
     out = ""
+    init(autoreset=True)
     while True:
         if not debug:
-            inp = input(f'{os.getcwd()} % ')
+            inp = input(Style.BRIGHT + Fore.GREEN + f'{os.getcwd()} % ')
+            if inp == 'exit':
+                break
+            print(colorama.Style.RESET_ALL, end='')
             args.clear()
             for i in inp.split(' '):
                 args.append(i)
@@ -354,10 +378,13 @@ if __name__ == '__main__':
                 vars.update(Main(args).return_vars())
                 history.append(inp)
             except:
-                print("Error: Failed to execute command!")
+                print(Fore.RED + Style.BRIGHT + "Error: Failed to execute command!")
 
         elif debug:
-            inp = input(f'{os.getcwd()} % ')
+            inp = input(Style.BRIGHT + Fore.GREEN + f'DEBUG {os.getcwd()} % ')
+            if inp == 'exit':
+                break
+            print(colorama.Style.RESET_ALL, end='')
             args.clear()
             for i in inp.split(' '):
                 args.append(i)
