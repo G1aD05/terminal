@@ -11,8 +11,7 @@ import zipfile as zip
 import signal
 import pyfiglet
 import urllib.request
-import colorama
-from colorama import Fore, Style, init
+from colorama import Fore, Style, Back, init
 
 
 class Main:
@@ -102,8 +101,7 @@ cd -- cd <dir>
 ls -- ls (current dir)
 ls -d -- ls <dir>
 read -- read <file dir>
-rmv -f -- rmv -f <file dir>
-rmv -d -- rmv -d <directory dir>
+rmv -- rmv <file/directory>
 move -- move <dir> <new dir>
 clear -- clear (clear terminal)
 make -f -- make -f <file name>
@@ -126,6 +124,8 @@ INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
 Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
+Use // as a seperator in commands (ex: echo Hello//echo World)
+Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt;file2.txt)
 """)
 
     def echo(self):
@@ -152,26 +152,27 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
                 os.chdir(self.prev_dir)
         else:
             for i in os.listdir():
-                print(i)
+                if os.path.isdir(i):
+                    print(Style.BRIGHT + Fore.BLUE + i + Style.RESET_ALL)
+                else:
+                    print(Fore.GREEN + Style.BRIGHT + i + Style.RESET_ALL)
 
     def debug(self):
         global debug
-        if len(self.args) >= 1:
-            if self.args[1] == "off":
-                print("Debug mode off")
-                debug = False
-            elif self.args[1] == "on":
-                print("Debug mode on")
-                debug = True
+        if self.args[1] == "off":
+            debug = False
+        elif self.args[1] == "on":
+            debug = True
 
     def read(self):
         print(open(self.parse_type(self.args[1]), 'r').read())
 
     def rmv(self):
-        if self.args[1] == '-f':
-            os.remove(self.parse_type(self.args[2]))
-        elif self.args[1] == '-d':
-            shutil.rmtree(self.parse_type(self.args[2]))
+        for i in self.parse_type(self.args[1]).split(";"):
+            if os.path.isfile(i):
+                os.remove(i)
+            elif os.path.isdir(i):
+                shutil.rmtree(i)
 
     def move(self):
         shutil.move(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
@@ -259,16 +260,17 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         os.chdir(self.prev_dir)
 
     def shell_run(self):
-        lines = []
-        parsed_lines = []
-        if os.path.isfile(self.args[1]):
-            for line in open(self.args[1], 'r').read().split('\n'):
-                lines.append(line)
-            for i in range(len(lines)):
-                parsed_lines.append(lines[i].split(" "))
-            for i in range(len(parsed_lines)):
-                self.args = parsed_lines[i]
-                self.parse_cmd()
+        arg = self.args[1]
+        line_args = []
+        self.args.clear()
+        if os.path.isfile(arg):
+            for line in open(arg, 'r').read().split('\n'):
+                for batch in line.split('//'):
+                    for parsed in [self.parse_type(batch).split(' ')]:
+                        line_args.append(parsed)
+        for i in range(len(line_args)):
+            self.args = line_args[i]
+            self.parse_cmd()
 
     def input(self):
         global out
@@ -276,9 +278,11 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
 
     def zip(self):
         if self.args[1] == "-z":
+            print("Zipping...")
             with zip.ZipFile(self.parse_type(self.args[2]), 'w') as file:
                 file.write(self.parse_type(self.args[3]))
-        if self.args[1] == "-u":
+        elif self.args[1] == "-u":
+            print("Unzipping...")
             with zip.ZipFile(self.parse_type(self.args[2]), 'r') as file:
                 file.extractall(self.parse_type(self.args[3]))
 
@@ -300,7 +304,7 @@ Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
         for line in open(self.parse_type(self.args[1]), 'r').read().split('\n'):
             index += 1
             if self.parse_type(self.args[2]) in line:
-                print(f"Line {index}: {line.replace(self.parse_type(self.args[2]), f"~{self.parse_type(self.args[2])}~")}")
+                print(f"Line {index}: {line.replace(self.parse_type(self.args[2]), Back.GREEN + Style.BRIGHT + f"{self.parse_type(self.args[2])}" + Style.RESET_ALL)}")
                 times += 1
         print(f"Search term \"{self.parse_type(self.args[2])}\" found {times} times in {self.args[1]}")
 
@@ -364,30 +368,32 @@ if __name__ == '__main__':
     debug = False
     params = []
     out = ""
+    idx = 0
     init(autoreset=True)
     while True:
         if not debug:
-            inp = input(Style.BRIGHT + Fore.GREEN + f'{os.getcwd()} % ')
+            inp = input(Fore.LIGHTGREEN_EX + f'{os.getcwd()} % ' + Style.RESET_ALL)
             if inp == 'exit':
                 break
-            print(colorama.Style.RESET_ALL, end='')
             args.clear()
-            for i in inp.split(' '):
-                args.append(i)
-            try:
-                vars.update(Main(args).return_vars())
-                history.append(inp)
-            except:
-                print(Fore.RED + Style.BRIGHT + "Error: Failed to execute command!")
+            for x in inp.split('//'):
+                for i in [x.split(' ')]:
+                    args.append(i)
+            for z in range(len(args)):
+                try:
+                    vars.update(Main(args[z]).return_vars())
+                    history.append(inp)
+                except:
+                    print(Fore.RED + Style.BRIGHT + "Error: Failed to execute command!")
 
         elif debug:
-            inp = input(Style.BRIGHT + Fore.GREEN + f'DEBUG {os.getcwd()} % ')
+            inp = input(Fore.LIGHTGREEN_EX + Style.BRIGHT + "[DEBUG] " + Style.RESET_ALL + Fore.LIGHTGREEN_EX + f'{os.getcwd()} % ' + Style.RESET_ALL)
             if inp == 'exit':
                 break
-            print(colorama.Style.RESET_ALL, end='')
             args.clear()
-            for i in inp.split(' '):
-                args.append(i)
-
-            vars.update(Main(args).return_vars())
-            history.append(inp)
+            for x in inp.split('//'):
+                for i in [x.split(' ')]:
+                    args.append(i)
+            for z in range(len(args)):
+                    vars.update(Main(args[z]).return_vars())
+                    history.append(inp)
