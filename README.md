@@ -12,8 +12,7 @@
 ```ls``` -- ls (current dir)\
 ```ls -d``` -- ls \<dir>\
 ```read``` -- read \<file dir>\
-```rmv -f``` -- rmv -f \<file dir>\
-```rmv -d``` -- rmv -d \<directory dir>\
+```rmv``` -- rmv \<file/directory>\
 ```move``` -- move \<dir\> \<new dir\>\
 ```clear``` -- clear (clear terminal)\
 ```make``` -f -- make -f \<file name\>\
@@ -39,28 +38,32 @@
 > Use % on most of the commands to use a variable (ex: echo %variable)\
 > Use & as a space in strings (ex: echo Hello,&World)\
 > Use \_rand_ to generate a random number (BETA) (ex: echo \_rand_)
+> Use // as a seperator in commands (ex: echo Hello//echo World)
+> Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt;file2.txt)
 
 ## How to use
 **1. Download the latest\
 2. Open your terminal and type ```python3 /path/to/file/```\
 3. You can start using this very basic terminal!**
 ## Versions
-### v1.0.0
+### v1.0.0-beta
 **Initial Release.**
-### v1.0.3
+### v1.0.3-beta
 **Simplified code and made variables acccessible to almost all of the commands.**
-### v1.1.0
+### v1.1.0-beta
 **Cleaned up code and added new commands.**
-### v1.2.1
+### v1.2.1-beta
 **Bug fixes, added the new run command, added ```_rand_``` (generates a random number) and added the ```&``` symbol which represents a space.**
-### v1.2.3
+### v1.2.3-beta
 **Fixed some left over debugging helper things that I accidentally left in**
-### v1.3.0
+### v1.3.0-beta
 **Improved variable detection system, added the ```input``` (Gets an input from the user access with @out) and ```!``` (Run shell files) commands, and bug fixes**
-### v1.3.5
+### v1.3.5-beta
 **Added the new ```zip```, ```kill``` and ```banner``` commands, added support for manual arguments for the run command**
-### v1.3.7
+### v1.3.7-beta
 **Added the new ```dld``` and ```find``` commands, added line coloring**
+### v1.4.0
+**Added more color coding, enhanced the ```rmv``` command, added command batching by using // and minor bug fixes, also it's out of beta.**
 
 ## Required modules
 ### localtz
