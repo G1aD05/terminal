@@ -12,6 +12,7 @@ import signal
 import pyfiglet
 import urllib.request
 from colorama import Fore, Style, Back, init
+from PIL import Image
 
 
 class Main:
@@ -73,8 +74,6 @@ class Main:
                 self.shell_run()
             case "input":
                 self.input()
-            case "run":
-                self.run()
             case "zip":
                 self.zip()
             case "kill":
@@ -85,10 +84,21 @@ class Main:
                 self.download()
             case "find":
                 self.find()
+            case "open":
+                self.open()
             case "":
                 pass
             case _:
-                print(Fore.RED + Style.BRIGHT + "Error: Command not found!")
+                if f"{self.args[0]}.py" in os.listdir("cmds"):
+                    spec = importlib.util.spec_from_file_location(self.args[0], f"cmds/{self.args[0]}.py")
+                    script = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(script)
+                    method = getattr(script, "Main")
+                    instance = method(self.args)
+                    run = getattr(instance, "main")
+                    run()
+                else:
+                    print(Fore.RED + Style.BRIGHT + "Error: Command not found!")
 
     @staticmethod
     def help():
@@ -111,7 +121,6 @@ time -format -- time -format <time format>
 ping -- ping <host name>
 history -- (lists command history)
 pcp -- (prints the current processes)
-run -- run <folder name>
 ! -- ! <file name> (ex: ! exec.txt)
 zip -u -- zip -u <zip file name> <directory name>
 zip -z -- zip -z <zip file name> <directory/file name>
@@ -120,11 +129,13 @@ banner -- banner <text>
 banner -f -- banner -f <text> <font>
 dld -- dld <url>
 find -- find <directory> <search term>
+open -- open <image name>
+
 INFO:
 Use % on most of the commands to use a variable (ex: echo %variable)
 Use & as a space in strings (ex: echo Hello,&World)
 Use _rand_ to generate a random number (BETA) (ex: echo _rand_)
-Use // as a seperator in commands (ex: echo Hello//echo World)
+Use "//" as a seperator in commands (ex: echo Hello // echo World)
 Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt;file2.txt)
 """)
 
@@ -186,11 +197,13 @@ Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt
 
     def make(self):
         if self.args[1] == '-d':
-            os.mkdir(self.parse_type(self.args[2]))
+            for i in self.parse_type(self.args[2]).split(";"):
+                os.mkdir(i)
         elif self.args[1] == '-f':
-            with open(self.parse_type(self.args[2]), 'w') as file:
-                file.write('')
-                file.close()
+            for i in self.parse_type(self.args[2]).split(";"):
+                with open(i, 'w') as file:
+                    file.write('')
+                    file.close()
 
     def copy(self):
         shutil.copy(self.parse_type(self.args[1]), self.parse_type(self.args[2]))
@@ -233,32 +246,6 @@ Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt
         for process in psutil.process_iter(['pid', 'name']):
             print(f"PID: {process.info['pid']}, Name: {process.info['name']}")
 
-    def run(self):
-        global params
-        self.prev_dir = os.getcwd()
-        os.chdir(self.args[1])
-        for line in open("run.txt", 'r').read().split('\n'):
-            self.file_lines.append(line)
-        spec = importlib.util.spec_from_file_location("init", "init.py")
-        script = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(script)
-        if len(self.file_lines) > 1:
-            if self.file_lines[1] == ":ARGS:":
-                params = []
-                for i in range(len(self.file_lines)):
-                    if self.file_lines[i] == "@arg":
-                        params.append(self.parse_type(self.args[i]))
-                    else:
-                        params.append(self.file_lines[i])
-                params = params[2:]
-        if hasattr(script, self.file_lines[0]):
-            klass = getattr(script, self.file_lines[0])
-            instance = klass(*params)
-            if hasattr(instance, self.file_lines[0]):
-                method = getattr(instance, self.file_lines[0])
-                method()
-        os.chdir(self.prev_dir)
-
     def shell_run(self):
         arg = self.args[1]
         line_args = []
@@ -278,16 +265,19 @@ Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt
 
     def zip(self):
         if self.args[1] == "-z":
-            print("Zipping...")
             with zip.ZipFile(self.parse_type(self.args[2]), 'w') as file:
-                file.write(self.parse_type(self.args[3]))
+                for x in self.args[3].split(";"):
+                    print(Style.BRIGHT + f"Deflating {x}...")
+                    file.write(self.parse_type(x))
         elif self.args[1] == "-u":
-            print("Unzipping...")
             with zip.ZipFile(self.parse_type(self.args[2]), 'r') as file:
+                for i in file.namelist():
+                    print(Style.BRIGHT + f"Inflating {i}...")
                 file.extractall(self.parse_type(self.args[3]))
 
     def kill(self):
-        os.kill(int(self.args[1]), signal.SIGKILL)
+        for i in self.args[1].split(";"):
+            os.kill(int(i), signal.SIGKILL)
 
     def banner(self):
         if self.args[1] == "-f":
@@ -304,9 +294,14 @@ Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt
         for line in open(self.parse_type(self.args[1]), 'r').read().split('\n'):
             index += 1
             if self.parse_type(self.args[2]) in line:
-                print(f"Line {index}: {line.replace(self.parse_type(self.args[2]), Back.GREEN + Style.BRIGHT + f"{self.parse_type(self.args[2])}" + Style.RESET_ALL)}")
+                print(
+                    f"Line {index}: {line.replace(self.parse_type(self.args[2]), Back.GREEN + Style.BRIGHT + f"{self.parse_type(self.args[2])}" + Style.RESET_ALL)}")
                 times += 1
         print(f"Search term \"{self.parse_type(self.args[2])}\" found {times} times in {self.args[1]}")
+
+    def open(self):
+        for i in self.args[1].split(";"):
+            Image.open(i).show()
 
     def return_vars(self) -> dict:
         return self.vars
@@ -376,7 +371,7 @@ if __name__ == '__main__':
             if inp == 'exit':
                 break
             args.clear()
-            for x in inp.split('//'):
+            for x in inp.split(' // '):
                 for i in [x.split(' ')]:
                     args.append(i)
             for z in range(len(args)):
@@ -387,7 +382,8 @@ if __name__ == '__main__':
                     print(Fore.RED + Style.BRIGHT + "Error: Failed to execute command!")
 
         elif debug:
-            inp = input(Fore.LIGHTGREEN_EX + Style.BRIGHT + "[DEBUG] " + Style.RESET_ALL + Fore.LIGHTGREEN_EX + f'{os.getcwd()} % ' + Style.RESET_ALL)
+            inp = input(
+                Fore.LIGHTGREEN_EX + Style.BRIGHT + "[DEBUG] " + Style.RESET_ALL + Fore.LIGHTGREEN_EX + f'{os.getcwd()} % ' + Style.RESET_ALL)
             if inp == 'exit':
                 break
             args.clear()
@@ -395,5 +391,5 @@ if __name__ == '__main__':
                 for i in [x.split(' ')]:
                     args.append(i)
             for z in range(len(args)):
-                    vars.update(Main(args[z]).return_vars())
-                    history.append(inp)
+                vars.update(Main(args[z]).return_vars())
+                history.append(inp)
