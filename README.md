@@ -1,4 +1,4 @@
-# Simple Terminal
+# Terminal
 
 > [!Note]\
 > Requires Python 3.x
@@ -31,14 +31,15 @@
 ```banner``` -- banner \<text>\
 ```banner -f``` -- banner -f \<text> \<font>\
 ```dld``` -- dld \<url> \<output name>\
-```find``` -- find \<file name> \<search term>**
+```find``` -- find \<file name> \<search term>\
+```timeit``` -- timeit \<command name\> \<args\>**
 
 > INFO:\
 > Use % on most of the commands to use a variable (ex: echo %variable)\
 > Use & as a space in strings (ex: echo Hello,&World)\
 > Use \_rand_ to generate a random number (BETA) (ex: echo \_rand_)\
 > Use // as a seperator in commands (ex: echo Hello//echo World)\
-> Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt;file2.txt)
+> Use ; in some of the commands to seperate an arg
 
 ## How to use
 **1. Download the latest\
