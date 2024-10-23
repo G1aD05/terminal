@@ -23,7 +23,6 @@
 ```history``` -- (lists command history)\
 ```history -a``` -- history -a \<list amount\>\
 ```pcp``` -- (prints the current processes)\
-```run``` -- run \<folder name>\
 ```input``` -- input <text>\
 ```!``` -- ! \<file name>\
 ```zip -u``` -- zip -u \<zip file name> \<directory name>\
@@ -64,6 +63,8 @@
 **Added the new ```dld``` and ```find``` commands, added line coloring**
 ### v1.4.0
 **Added more color coding, enhanced the ```rmv``` command, added command batching by using // and minor bug fixes, also it's out of beta.**
+### v1.4.1
+**Removed the ```run``` command and replaced it with files matching stuff**
 
 ## Required modules
 ### localtz
@@ -76,28 +77,4 @@
 **Install command: ```pip install pyfiglet```**
 ### colorama
 **Install command: ```pip install colorama```**
-
-## How to Make a Runnable Folder
-**Make a folder that looks like this:\
-```text
-<folder name>
-|-- run.txt
-|-- init.py
-```
-init.py must have a class in it, example:
-```python
-class Main:
-  def __init__(self, params):
-    # Some code
-  ```
-
-**run.txt must have the class name and required arguments, example:**
-
-```text
-Class Name Here
-:ARGS: (Optional if you don't need arguments for your __init__ then don't add this)
-argument
-@arg (This is optional it just lets a manual inputted argument when running the run command)
-```
-**then you can use this command: ```run <folder name>```**
 
