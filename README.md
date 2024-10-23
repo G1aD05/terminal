@@ -64,11 +64,11 @@
 ### v1.4.0
 **Added more color coding, enhanced the ```rmv``` command, added command batching by using // and minor bug fixes, also it's out of beta.**
 ### v1.4.1
-**Removed the ```run``` command and replaced it with files matching stuff**
+**Removed the ```run``` command and replaced it with files matching stuff and added the ```open``` command which opens images**
 
 ## Required modules
-### localtz
-**Install command: ```pip install localtz```**
+### tzlocal
+**Install command: ```pip install tzlocal```**
 ### ping3
 **Install command: ```pip install ping3```**
 ### psutil
@@ -77,4 +77,8 @@
 **Install command: ```pip install pyfiglet```**
 ### colorama
 **Install command: ```pip install colorama```**
+### pillow
+**Install command: ```pip install pillow```**
+
+### Install all the modules: ```pip install -r requirements.txt```
 
