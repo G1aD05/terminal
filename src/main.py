@@ -13,6 +13,7 @@ import pyfiglet
 import urllib.request
 from colorama import Fore, Style, Back, init
 from PIL import Image
+from timeit import timeit
 
 
 class Main:
@@ -86,6 +87,8 @@ class Main:
                 self.find()
             case "open":
                 self.open()
+            case "timeit":
+                self.timeit()
             case "":
                 pass
             case _:
@@ -177,6 +180,11 @@ Use ; in the RMV command to remove multiple files/directories (ex: rmv file1.txt
 
     def read(self):
         print(open(self.parse_type(self.args[1]), 'r').read())
+
+    def timeit(self):
+        self.args = self.args[1:]
+        print(self.args)
+        print(f"It took {timeit(self.parse_cmd, number=1)} seconds to execute the \"{self.args[0]}\" command")
 
     def rmv(self):
         for i in self.parse_type(self.args[1]).split(";"):
