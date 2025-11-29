@@ -34,7 +34,7 @@
 ```find``` -- find \<file name> \<search term>\
 ```timeit``` -- timeit \<command name\> \<args\>**
 
-> [!INFO]
+> [!NOTE]
 > Use % on most of the commands to use a variable (ex: echo %variable)\
 > Use & as a space in strings (ex: echo Hello,&World)\
 > Use \_rand_ to generate a random number (BETA) (ex: echo \_rand_)\
